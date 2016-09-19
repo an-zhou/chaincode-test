@@ -28,7 +28,7 @@ func main() {
 }
 
 // Init resets all the things
-func (t *TestChaincode) Init(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *TestChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	if len(args) < 2 {
 		return nil, errors.New("Incorrect number of arguments. Expecting at least 2")
 	}
@@ -36,7 +36,7 @@ func (t *TestChaincode) Init(stub *shim.ChaincodeStub, function string, args []s
 	bName := args[1]
 	
 	// Write the state to the ledger
-	err = stub.PutState(aName, []byte(strconv.Itoa(0)))
+	err := stub.PutState(aName, []byte(strconv.Itoa(0)))
 	if err != nil {
 		return nil, err
 	}
@@ -50,14 +50,14 @@ func (t *TestChaincode) Init(stub *shim.ChaincodeStub, function string, args []s
 }
 
 // Invoke is our entry point to invoke a chaincode function
-func (t *TestChaincode) Invoke(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *TestChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	fmt.Println("invoke is running " + function)
 
 	// Handle different functions
 	if function == "init" {													//initialize the chaincode state, used as reset
 		return t.Init(stub, "init", args)
 	} else if function == "transfer" {
-		return t.transfer(stub, function, args)
+		return t.transfer(stub, args)
 	}
 	fmt.Println("invoke did not find func: " + function)					//error
 
@@ -65,7 +65,7 @@ func (t *TestChaincode) Invoke(stub *shim.ChaincodeStub, function string, args [
 }
 
 // Query is our entry point for queries
-func (t *TestChaincode) Query(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *TestChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	fmt.Println("query is running " + function)
 
 	// Handle different functions
@@ -77,13 +77,13 @@ func (t *TestChaincode) Query(stub *shim.ChaincodeStub, function string, args []
 	return nil, errors.New("Received unknown function query")
 }
 
-func (t *TestChaincode) getBalance(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+func (t *TestChaincode) getBalance(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
 	name := args[0]
 	fmt.Println("reading value for " + name)
-	val,err = stub.GetState(name)
+	val,err := stub.GetState(name)
 	if err != nil {
 		return nil,err
 	}
@@ -91,7 +91,7 @@ func (t *TestChaincode) getBalance(stub *shim.ChaincodeStub, args []string) ([]b
 }
 
 // from, to, amount
-func (t *TestChaincode) transfer(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+func (t *TestChaincode) transfer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 3 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 3")
 	}
@@ -102,16 +102,18 @@ func (t *TestChaincode) transfer(stub *shim.ChaincodeStub, args []string) ([]byt
 		return nil, errors.New("3rd value must be integer")
 	}
 	
-	fmt.Println("transferring " + val + " from " + from + " to " + to)
+	fmt.Println("transferring " + args[2] + " from " + from + " to " + to)
 	
-	fromBalance,err := stub.GetState(from)
+	fromBal_,err := stub.GetState(from)
+	fromBalance,err := strconv.Atoi(string(fromBal_))
 	if err != nil {
 		return nil, errors.New("Failed to get state")
 	}
 	if amount > fromBalance {
 		return nil, errors.New("Not enough money in account to transfer")
 	}
-	toBalance,err := stub.GetState(to)
+	toBal_,err := stub.GetState(to)
+	toBalance,err := strconv.Atoi(string(toBal_))
 	if err != nil {
 		return nil, errors.New("Failed to get state")
 	}
