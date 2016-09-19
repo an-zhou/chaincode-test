@@ -58,6 +58,10 @@ func (t *TestChaincode) Invoke(stub *shim.ChaincodeStub, function string, args [
 		return t.Init(stub, "init", args)
 	} else if function == "transfer" {
 		return t.transfer(stub, args)
+	} else if function == "earn" {
+		return t.earn(stub, args)
+	} else if function == "set" {
+		return t.earn(stub, args)
 	}
 	fmt.Println("invoke did not find func: " + function)					//error
 
@@ -136,10 +140,53 @@ func (t *TestChaincode) transfer(stub *shim.ChaincodeStub, args []string) ([]byt
 	return nil, nil
 }
 
+func (t *TestChaincode) earn(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2")
+	}
+	to := args[0]
+	amount,err := strconv.Atoi(args[1])
+	if err != nil {
+		return nil, errors.New("2nd value must be integer")
+	}
+	
+	bal_,err := stub.GetState(to)
+	balance,err := strconv.Atoi(string(bal_))
+	if err != nil {
+		return nil, errors.New("Failed to get state")
+	}
+	if amount + balance < 0 {
+		return nil, errors.New("Not enough money in account")
+	}
+	
+	balance += amount
+	
+	// Write the state back to the ledger
+	err = stub.PutState(to, []byte(strconv.Itoa(balance)))
+	if err != nil {
+		return nil, err
+	}
+	return nil,nil
+	
+}
 
-
-
-
+func (t *TestChaincode) set(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2")
+	}
+	to := args[0]
+	amount,err := strconv.Atoi(args[1])
+	if err != nil {
+		return nil, errors.New("2nd value must be integer")
+	}
+	
+	// Write the state back to the ledger
+	err = stub.PutState(to, []byte(strconv.Itoa(amount)))
+	if err != nil {
+		return nil, err
+	}
+	return nil,nil	
+}
 
 
 /*
