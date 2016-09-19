@@ -28,7 +28,7 @@ func main() {
 }
 
 // Init resets all the things
-func (t *TestChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+func (t *TestChaincode) Init(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
 	if len(args) < 2 {
 		return nil, errors.New("Incorrect number of arguments. Expecting at least 2")
 	}
@@ -50,7 +50,7 @@ func (t *TestChaincode) Init(stub shim.ChaincodeStubInterface, function string, 
 }
 
 // Invoke is our entry point to invoke a chaincode function
-func (t *TestChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+func (t *TestChaincode) Invoke(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
 	fmt.Println("invoke is running " + function)
 
 	// Handle different functions
@@ -65,7 +65,7 @@ func (t *TestChaincode) Invoke(stub shim.ChaincodeStubInterface, function string
 }
 
 // Query is our entry point for queries
-func (t *TestChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+func (t *TestChaincode) Query(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
 	fmt.Println("query is running " + function)
 
 	// Handle different functions
@@ -77,7 +77,7 @@ func (t *TestChaincode) Query(stub shim.ChaincodeStubInterface, function string,
 	return nil, errors.New("Received unknown function query")
 }
 
-func (t *TestChaincode) getBalance(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *TestChaincode) getBalance(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
@@ -91,7 +91,7 @@ func (t *TestChaincode) getBalance(stub shim.ChaincodeStubInterface, args []stri
 }
 
 // from, to, amount
-func (t *TestChaincode) transfer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *TestChaincode) transfer(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
 	if len(args) != 3 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 3")
 	}
