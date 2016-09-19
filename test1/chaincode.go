@@ -36,12 +36,12 @@ func (t *TestChaincode) Init(stub *shim.ChaincodeStub, function string, args []s
 	bName := args[1]
 	
 	// Write the state to the ledger
-	err := stub.PutState(aName, []byte(strconv.Itoa(0)))
+	err := stub.PutState(aName, []byte(strconv.Itoa(1000)))
 	if err != nil {
 		return nil, err
 	}
 
-	err = stub.PutState(bName, []byte(strconv.Itoa(0)))
+	err = stub.PutState(bName, []byte(strconv.Itoa(1000)))
 	if err != nil {
 		return nil, err
 	}
